@@ -58,6 +58,10 @@ export class GraphicsEngine {
 
         bindAll(this.canvas);
         bindVisabilityChange(this.onVisibilityChange);
+
+
+        this.resizeCanvas();
+        window.addEventListener("resize", () => this.resizeCanvas());
     }
 
     mainloop = () => {
@@ -87,6 +91,21 @@ export class GraphicsEngine {
         } 
         else {
             this.currentAnimationFrame = requestAnimationFrame(this.mainloop);
+        }
+    }
+
+    resizeCanvas() {
+        const displayWidth = this.canvas.clientWidth;
+        const displayHeight = this.canvas.clientHeight;
+
+        if (this.canvas.width !== displayWidth || this.canvas.height !== displayHeight) {
+            this.canvas.width = displayWidth;
+            this.canvas.height = displayHeight;
+
+            this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
+
+            this.matricies = initMatricies(this.canvas, camera);
+            this.gl.uniformMatrix4fv(this.matUniformLocs.proj, false, this.matricies.proj);
         }
     }
 
