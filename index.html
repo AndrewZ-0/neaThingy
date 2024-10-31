@@ -31,15 +31,14 @@
             <p id = "azimuth-overlay" class = "overlay-element"></p>
 		</div>
 
-		<canvas id = "model-surface" width = 1200 height = 650></canvas>
+		<canvas id = "model-surface"></canvas>
 		
         
-
+        <!--
 		<div style = "position: absolute; bottom: 0px;">
 			<i>This application is and forever shall be 1200x650! Screen not big enough? SKILL ISSUE!</i>
 		</div>
 
-		<!--
 		<div style = "position: absolute; bottom: 0px;">
 			<i>Commands:</i>
 			<ul>
@@ -51,8 +50,21 @@
 		</div>
 		-->
 
-        
+
         <script src = "index.js" type = "module"></script>
+
+        <script>
+            // Ensure the canvas is exactly the size of the window
+            function resizeCanvas() {
+                const canvas = document.getElementById('model-surface');
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+    
+            // Resize on load and on window resize
+            window.addEventListener('load', resizeCanvas);
+            window.addEventListener('resize', resizeCanvas);
+        </script>
 	</body>
 
 </html>
