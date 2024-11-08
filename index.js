@@ -16,8 +16,6 @@ const objects = [
 ];
 
 
-
-
 /*
 const objects = [
     //new Sphere(-0.8, 0, 0, 0.2, 8, [1, 0, 0]), 
