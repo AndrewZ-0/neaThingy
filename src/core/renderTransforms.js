@@ -1,4 +1,5 @@
-import * as utils from "../utils/viewHelper.js"
+import * as utils from "../utils/viewHelper.js";
+
 
 export function initUniforms(gl, program) {
     return {
@@ -25,4 +26,29 @@ export function initMatricies(canvas, camera) {
     );
 
     return matricies;
+}
+
+
+const lightPosition = [0, 10, 0]; 
+const lightColour = [1, 1, 1];
+const lightAmbient = [0.05, 0.05, 0.05];
+const lightStrength = 200;
+
+export function initLightingUniforms(gl, program) {
+    const lightPositionUniformLoc = gl.getUniformLocation(program, "lightPos");
+    const lightColourUniformLoc = gl.getUniformLocation(program, "lightColour");
+    const lightAmbientUniformLoc = gl.getUniformLocation(program, "lightAmbient");
+    const lightStrengthUniformLoc = gl.getUniformLocation(program, "lightStrength");
+
+    gl.uniform3fv(lightPositionUniformLoc, lightPosition);
+    gl.uniform3fv(lightColourUniformLoc, lightColour);
+    gl.uniform3fv(lightAmbientUniformLoc, lightAmbient);
+    gl.uniform1f(lightStrengthUniformLoc, lightStrength);
+
+    return {
+        pos: lightPositionUniformLoc, 
+        colour: lightColourUniformLoc,
+        ambient: lightAmbientUniformLoc, 
+        strength: lightStrengthUniformLoc
+    }
 }

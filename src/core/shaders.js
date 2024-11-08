@@ -1,61 +1,85 @@
-export let shaderMode = "basic";
-
-
-function loadShaderFile(url) {
-    let xhr = new XMLHttpRequest();
-    xhr.open("GET", url, false);
-    xhr.send(null);
-    return xhr.responseText;
-}
-
-function createShader(gl, source, type) {
-    let shader = gl.createShader(type);
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    return shader;
-}
-
-function createShaderSet(gl, vsURL, fsURL) {
-    let vertexShaderSource = loadShaderFile(vsURL);
-    let fragmentShaderSource = loadShaderFile(fsURL);
-
-    let vertexShader = createShader(gl, vertexShaderSource, gl.VERTEX_SHADER);
-    let fragmentShader = createShader(gl, fragmentShaderSource, gl.FRAGMENT_SHADER);
-
-    let program = gl.createProgram();
-    gl.attachShader(program, vertexShader);
-    gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program);
-
-    program.vShader = vertexShader;
-    program.fShader = fragmentShader;
-
-    return program;
-}
-
-export function createAllShaders(gl) {
-    return createShaderSet(gl, "src/shaders/basic/vertexShader.glsl", "src/shaders/basic/fragmentShader.glsl");
-}
-
-export function shaderDrawElements(gl, indicesLength) {
-    if (shaderMode === "basic") {
-        gl.drawElements(gl.TRIANGLES, indicesLength, gl.UNSIGNED_SHORT, 0);
+class Shader {
+    constructor(gl, vsURL, fsURL) {
+        this.gl = gl;
+        this.vertexShader;
+        this.fragmentShader;
+        this.program;
+        this.normalsFlag = false;
+        this.createShaderSet(vsURL, fsURL);
     }
-    else if(shaderMode === "wire") {
-        gl.drawElements(gl.LINES, indicesLength, gl.UNSIGNED_SHORT, 0);
+
+    loadShaderFile(url) {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", url, false);
+        xhr.send(null);
+        return xhr.responseText;
+    }
+
+    createShader(source, type) {
+        const shader = this.gl.createShader(type);
+        this.gl.shaderSource(shader, source);
+        this.gl.compileShader(shader);
+        return shader;
+    }
+
+    createShaderSet(vsURL, fsURL) {
+        const vertexShaderSource = this.loadShaderFile(vsURL);
+        const fragmentShaderSource = this.loadShaderFile(fsURL);
+
+        this.vertexShader = this.createShader(vertexShaderSource, this.gl.VERTEX_SHADER);
+        this.fragmentShader = this.createShader(fragmentShaderSource, this.gl.FRAGMENT_SHADER);
     }
 }
 
-export function toggleShaderMode() {
-    if (shaderMode === "basic") {
-        shaderMode = "wire";
-    }
-    else if(shaderMode === "wire") {
-        shaderMode = "basic";
+export class BasicShader extends Shader {
+    constructor(gl) {
+        super(gl, "src/shaders/basic/vertexShader.glsl", "src/shaders/basic/fragmentShader.glsl");
+        this.name = "basic";
     }
 
-    updateShaderOverlays();
+    shaderDrawElements(indicesLength) {
+        this.gl.drawElements(this.gl.TRIANGLES, indicesLength, this.gl.UNSIGNED_SHORT, 0);
+    }
 }
 
+export class SkeletonShader extends Shader {
+    constructor(gl) {
+        super(gl, "src/shaders/basic/vertexShader.glsl", "src/shaders/basic/fragmentShader.glsl");
+        this.name = "skeleton";
+    }
 
+    shaderDrawElements(indicesLength) {
+        this.gl.drawElements(this.gl.LINES, indicesLength, this.gl.UNSIGNED_SHORT, 0);
+    }
+}
 
+export class PointsShader extends Shader {
+    constructor(gl) {
+        super(gl, "src/shaders/basic/vertexShader.glsl", "src/shaders/basic/fragmentShader.glsl");
+        this.name = "points";
+    }
+
+    shaderDrawElements(indicesLength) {
+        this.gl.drawElements(this.gl.POINTS, indicesLength, this.gl.UNSIGNED_SHORT, 0);
+    }
+}
+
+export class LightingShader extends Shader {
+    constructor(gl) {
+        super(gl, "src/shaders/lighting/vertexShader.glsl", "src/shaders/lighting/fragmentShader.glsl");
+        this.name = "lighting";
+        this.normalsFlag = true;
+    }
+
+    shaderDrawElements(indicesLength) {
+        this.gl.drawElements(this.gl.TRIANGLES, indicesLength, this.gl.UNSIGNED_SHORT, 0);
+        //const error = this.gl.getError();
+
+        /*
+        if (error !== this.gl.NO_ERROR) {
+            console.error(error);
+            //console.log(indicesLength);
+            //console.log(this.gl.getBufferParameter(this.gl.ARRAY_BUFFER, this.gl.BUFFER_SIZE));
+        }*/
+    }
+}

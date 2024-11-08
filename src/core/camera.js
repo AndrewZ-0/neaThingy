@@ -1,52 +1,28 @@
-import * as utils from "../utils/viewHelper.js"
+import * as utils from "../utils/viewHelper.js";
 import {
     updateCameraCartesianCoordsOverlays, updateCameraModeOverlay, 
     updateCameraEulerAnglesOverlays, updateCameraPolarCoordsOverlays
-} from "./overlays.js"
-import {deltaT} from "./clock.js"
-import {keys} from "./listeners.js"
+} from "./overlays.js";
+import {clock} from "./clock.js";
+import {keys, mouseDragging} from "./listeners.js";
+
 
 export let cameraMode = "Y-Polar";
 
 
 class Camera {
     constructor() {
-        this.mouseDragging = false;
-        this.lastX;
-        this.lastY;
-
         this.fov = 45;
-        this.near = 0.1;
+        this.near = 0.01;
         this.far = 1000;
 
         this.cameraSpeed = 6;
 
         this.sensitivity = 0.001;
-    }
 
-    mouseButtonCallback(event) {
-        if (event.button === 0) {
-            if (event.type === "mousedown") {
-                this.mouseDragging = true;
-                this.lastX = event.clientX;
-                this.lastY = event.clientY;
-            } 
-            else if (event.type === "mouseup" || event.type === "mouseleave") {
-                this.mouseDragging = false;
-            }
-        }
-    }
-
-    nextMouseOffset(event) {
-        const xoffset = (this.lastX - event.clientX) * this.sensitivity;
-        const yoffset = (this.lastY - event.clientY) * this.sensitivity;
-        this.lastX = event.clientX;
-        this.lastY = event.clientY;
-
-        return {x: xoffset, y: yoffset};
+        this.coords;
     }
 }
-
 
 
 class CartesianCamera extends Camera {
@@ -83,9 +59,9 @@ class CartesianCamera extends Camera {
     }
 
     handleMovements() {
-        utils.scaleTranslateVec3(this.coords, this.front, this.cameraSpeed * deltaT * (keys.w - keys.s));
-        utils.scaleTranslateVec3(this.coords, this.right, this.cameraSpeed * deltaT * (keys.d - keys.a));
-        utils.scaleTranslateVec3(this.coords, this.up, this.cameraSpeed * deltaT * (keys.space - keys.shift));
+        utils.scaleTranslateVec3(this.coords, this.front, this.cameraSpeed * clock.deltaT * (keys.w - keys.s));
+        utils.scaleTranslateVec3(this.coords, this.right, this.cameraSpeed * clock.deltaT * (keys.d - keys.a));
+        utils.scaleTranslateVec3(this.coords, this.up, this.cameraSpeed * clock.deltaT * (keys.space - keys.shift));
     
         updateCameraCartesianCoordsOverlays();
     }
@@ -97,23 +73,18 @@ class CartesianCamera extends Camera {
     }
 
     //Beefed up version of euler rotaion approach...
-    mouseMoveCallback(event) {
-        if (this.mouseDragging) {
-            //get relative change on screen
-            const offset = this.nextMouseOffset(event);
+    onMouseMove(offset) {
+        //create a set of axis relative to camera to apply offsets to
+        utils.applyQuat(this.orientation, utils.getAxisAngle(this.up, offset.x * this.sensitivity));  //yaw
+        utils.applyQuat(this.orientation, utils.getAxisAngle(this.right, offset.y * this.sensitivity)); //pitch
 
-            //create a set of axis relative to camera to apply offsets to
-            utils.applyQuat(this.orientation, utils.getAxisAngle(this.up, offset.x));  //yaw
-            utils.applyQuat(this.orientation, utils.getAxisAngle(this.right, offset.y)); //pitch
+        utils.normaliseQuat(this.orientation);
 
-            utils.normaliseQuat(this.orientation);
+        //calculate local direction vectors from camera quat
+        this.updateDirectionVects();
 
-            //calculate local direction vectors from camera quat
-            this.updateDirectionVects();
-
-            //print out as euler angles because my pea sized brain can not understand 4d coordinates without having 17 simultaneous aneurysms
-            updateCameraEulerAnglesOverlays();
-        }
+        //print out as euler angles because my pea sized brain can not understand 4d coordinates without having 17 simultaneous aneurysms
+        updateCameraEulerAnglesOverlays();
     }
 
     updateCamera(viewMatrix) {
@@ -139,14 +110,13 @@ class PolarCamera extends Camera {
         }
 
         this.sensitivity = 0.005;
-        this.azi_movement_sf = this.cameraSpeed * deltaT / 2;
-        this.alt_movement_sf = this.cameraSpeed * deltaT / 4;
+        this.azi_movement_sf = this.cameraSpeed * clock.deltaT / 2;
+        this.alt_movement_sf = this.cameraSpeed * clock.deltaT / 4;
 
         this.r = init_r; //radial distance
         this.alt = init_alt; //altitude
         this.azi = init_azi; //azimuth
 
-        this.coords;
         this.front;
     }
 
@@ -174,7 +144,7 @@ class PolarCamera extends Camera {
         this.readjustAngles();
 
         this.coords = utils.coordsfromPolar(this.r, this.alt, this.azi);
-        this.front = utils.normalizeVec3({
+        this.front = utils.normaliseVec3({
             x: this.localOrigin.x - this.coords.x, 
             y: this.localOrigin.y - this.coords.y, 
             z: this.localOrigin.z - this.coords.z
@@ -184,7 +154,7 @@ class PolarCamera extends Camera {
     }
 
     handleMovements() {
-        this.r += this.cameraSpeed * deltaT * (keys.s - keys.w);
+        this.r += this.cameraSpeed * clock.deltaT * (keys.s - keys.w);
         this.azi += this.azi_movement_sf * (keys.d - keys.a);
         this.alt += this.alt_movement_sf * (keys.space - keys.shift);
 
@@ -192,16 +162,12 @@ class PolarCamera extends Camera {
         this.updatePosition();
     }
 
-    mouseMoveCallback(event) {
-        if (this.mouseDragging) {
-            const offset = this.nextMouseOffset(event);
+    onMouseMove(offset) {
+        this.alt -= offset.y * this.sensitivity;
+        this.azi += offset.x * this.sensitivity;
 
-            this.alt -= offset.y;
-            this.azi += offset.x;
-
-            this.readjustAngles();
-            this.updatePosition();
-        }
+        this.readjustAngles();
+        this.updatePosition();
     }
 
     updateCamera(viewMatrix) {
@@ -213,7 +179,6 @@ class PolarCamera extends Camera {
     getOrientationViewMatrix(viewMatrix) {
         utils.lookAt(viewMatrix, this.localOrigin, this.front, utils.globalUp);
     }
-
 }
 
 

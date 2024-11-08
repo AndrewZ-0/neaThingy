@@ -1,16 +1,9 @@
-import {initGl, render} from "./core/renderer.js"
-import {updateDeltaT} from "./core/clock.js"
-import {initBuffers, setAttrPointers} from "./core/buffers.js"
-import {initUniforms, initMatricies} from "./core/renderTransforms.js";
-import {createAllShaders} from "./core/shaders.js"
-import {camera} from "./core/camera.js"
-import {
-    updateShaderOverlays, updateCameraModeOverlay, 
-    updateCameraPerspectiveOverlays, updateFpsOverlay
-} from "./core/overlays.js"
-import {bindVisabilityChange, bindAll} from "./core/listeners.js"
-import {initMiniAxis} from "./core/orientationViewPort.js"
-
+import {clock} from "./core/clock.js";
+import {masterRenderer, axisRenderer} from "./core/renderer.js";
+import {camera} from "./core/camera.js";
+import {updateCameraModeOverlay, updateCameraPerspectiveOverlays, updateFpsOverlay} from "./core/overlays.js";
+import {bindVisabilityChange, bindAllControls} from "./core/listeners.js";
+import {orientationMenu} from "./core/orientationViewPort.js";
 
 export class GraphicsEngine {
     constructor(objects) {
@@ -18,71 +11,52 @@ export class GraphicsEngine {
         this.currentAnimationFrame;
         this.loop;
 
-        this.gl = initGl(this.canvas);
+        //get elements from HTML
+        this.gl = this.canvas.getContext("webgl2", {antialias: true});
 
-        //compile shaders
-        this.program = createAllShaders(this.gl);
+        //initialize WebGL
+        this.gl.clearColor(0, 0, 0, 1);
+        this.gl.enable(this.gl.DEPTH_TEST);
+        this.gl.enable(this.gl.CULL_FACE);
+        this.gl.frontFace(this.gl.CCW);
+        this.gl.cullFace(this.gl.BACK);
 
+        //compile shaders, buffers and render transform matricies
+        masterRenderer.initialise(this.gl, this.canvas, camera, objects);
 
-        //----------------------------------------------------------------------------------------------------
-        //temp: objects logic here is just for testing. will be improved later
-        this.objects = objects;
-        //----------------------------------------------------------------------------------------------------
-
-
-        this.buffers = initBuffers(this.gl, this.objects);
-
-        //get init attr locs
-        this.positionAttrLoc = this.gl.getAttribLocation(this.program, "vertPosition");
-        this.colourAttrLoc = this.gl.getAttribLocation(this.program, "vertColour");
-
-        setAttrPointers(this.gl, this.buffers, this.positionAttrLoc, this.colourAttrLoc);
-
-        //use shader program
-        this.gl.useProgram(this.program);
-
-        this.matUniformLocs = initUniforms(this.gl, this.program);
-        this.matricies = initMatricies(this.canvas, camera);
-
-        updateShaderOverlays();
         updateCameraModeOverlay();
         updateCameraPerspectiveOverlays();
         camera.updateAllOverlays();
-        //updateCameraEulerAnglesOverlays();
 
-        this.gl.uniformMatrix4fv(this.matUniformLocs.world, false, this.matricies.world);
-        this.gl.uniformMatrix4fv(this.matUniformLocs.view, false, this.matricies.view);
-        this.gl.uniformMatrix4fv(this.matUniformLocs.proj, false, this.matricies.proj);
+        masterRenderer.setAllUniformMatrixies();
 
-        this.miniAxisData = initMiniAxis(this.gl);
-
-        bindAll(this.canvas);
+        //listener bindings
+        bindAllControls(this.canvas);
         bindVisabilityChange(this.onVisibilityChange);
 
-
+        //shut up, it's for the mobile version. I would never
         this.resizeCanvas();
         window.addEventListener("resize", () => this.resizeCanvas());
     }
 
     mainloop = () => {
-        camera.updateCamera(this.matricies.view);
-        this.gl.uniformMatrix4fv(this.matUniformLocs.view, false, this.matricies.view);
+        camera.updateCamera(masterRenderer.matricies.view);
+        masterRenderer.render();
 
-        render(
-            this.gl, this.canvas, this.objects, this.buffers, 
-            this.positionAttrLoc, this.colourAttrLoc, 
-            this.matUniformLocs, this.matricies, 
-            this.miniAxisData
-        );
+        orientationMenu.updateView();
+        axisRenderer.render();
 
-        updateDeltaT();
+        clock.updateDeltaT();
         updateFpsOverlay();
 
         this.currentAnimationFrame = requestAnimationFrame(this.mainloop);
     };
 
     start = () => {
-        requestAnimationFrame(this.mainloop);
+        //condition here as a quick fix for initial hidden document "inifinity fps issue"
+        if (!document.hidden) {
+            requestAnimationFrame(this.mainloop);
+        }
     }
 
     onVisibilityChange = () => {
@@ -90,6 +64,7 @@ export class GraphicsEngine {
             cancelAnimationFrame(this.currentAnimationFrame);
         } 
         else {
+            clock.last_t = window.performance.now();
             this.currentAnimationFrame = requestAnimationFrame(this.mainloop);
         }
     }
@@ -104,10 +79,9 @@ export class GraphicsEngine {
 
             this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
 
-            this.matricies = initMatricies(this.canvas, camera);
-            this.gl.uniformMatrix4fv(this.matUniformLocs.proj, false, this.matricies.proj);
+            masterRenderer.setMatricies();
+            masterRenderer.setProjUniformMatrix4fv();
         }
     }
-
 }
 

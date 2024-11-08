@@ -1,7 +1,7 @@
-import {camera, cameraMode} from "./camera.js"
-import {shaderMode} from "./shaders.js"
-import * as utils from "../utils/viewHelper.js"
-import {current_fps, updateFps} from "./clock.js"
+import {camera, cameraMode} from "./camera.js";
+import {masterRenderer} from "./renderer.js";
+import * as utils from "../utils/viewHelper.js";
+import {clock} from "./clock.js";
 
 //fps stuff
 const FPS_updateCycle = 30;
@@ -9,19 +9,19 @@ const FPS_updateCycle = 30;
 let last_update_frame = 0
 
 export function updateFpsOverlay() {
-    last_update_frame += 1;
+    last_update_frame++;
 
     if (last_update_frame === FPS_updateCycle) {
-        updateFps();
+        clock.updateFps();
         //this is an absolutely cursed way of doing fstring
-        document.getElementById("fps-overlay").innerHTML = `FPS: ${current_fps.toFixed(3)}`; 
+        document.getElementById("fps-overlay").innerHTML = `FPS: ${clock.current_fps.toFixed(3)}`; 
 
         last_update_frame = 0;
     }
 }
 
 export function updateShaderOverlays() {
-    document.getElementById("shaderMode-overlay").innerHTML = `ShaderMode: ${shaderMode}`;
+    document.getElementById("shaderMode-overlay").innerHTML = `ShaderMode: ${masterRenderer.shader.name}`;
 }
 
 export function updateCameraModeOverlay() {
