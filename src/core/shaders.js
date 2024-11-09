@@ -35,10 +35,11 @@ export class BasicShader extends Shader {
     constructor(gl) {
         super(gl, "src/shaders/basic/vertexShader.glsl", "src/shaders/basic/fragmentShader.glsl");
         this.name = "basic";
+        this.preferredMode = gl.TRIANGLES;
     }
 
-    shaderDrawElements(indicesLength) {
-        this.gl.drawElements(this.gl.TRIANGLES, indicesLength, this.gl.UNSIGNED_SHORT, 0);
+    shaderDrawElements(indicesLength, mode) {
+        this.gl.drawElements(mode, indicesLength, this.gl.UNSIGNED_SHORT, 0);
     }
 }
 
@@ -46,10 +47,11 @@ export class SkeletonShader extends Shader {
     constructor(gl) {
         super(gl, "src/shaders/basic/vertexShader.glsl", "src/shaders/basic/fragmentShader.glsl");
         this.name = "skeleton";
+        this.preferredMode = gl.LINES;
     }
 
-    shaderDrawElements(indicesLength) {
-        this.gl.drawElements(this.gl.LINES, indicesLength, this.gl.UNSIGNED_SHORT, 0);
+    shaderDrawElements(indicesLength, mode) {
+        this.gl.drawElements(mode, indicesLength, this.gl.UNSIGNED_SHORT, 0);
     }
 }
 
@@ -57,10 +59,11 @@ export class PointsShader extends Shader {
     constructor(gl) {
         super(gl, "src/shaders/basic/vertexShader.glsl", "src/shaders/basic/fragmentShader.glsl");
         this.name = "points";
+        this.preferredMode = gl.POINTS;
     }
 
-    shaderDrawElements(indicesLength) {
-        this.gl.drawElements(this.gl.POINTS, indicesLength, this.gl.UNSIGNED_SHORT, 0);
+    shaderDrawElements(indicesLength, mode) {
+        this.gl.drawElements(mode, indicesLength, this.gl.UNSIGNED_SHORT, 0);
     }
 }
 
@@ -69,10 +72,11 @@ export class LightingShader extends Shader {
         super(gl, "src/shaders/lighting/vertexShader.glsl", "src/shaders/lighting/fragmentShader.glsl");
         this.name = "lighting";
         this.normalsFlag = true;
+        this.preferredMode = gl.TRIANGLES;
     }
 
-    shaderDrawElements(indicesLength) {
-        this.gl.drawElements(this.gl.TRIANGLES, indicesLength, this.gl.UNSIGNED_SHORT, 0);
+    shaderDrawElements(indicesLength, mode) {
+        this.gl.drawElements(mode, indicesLength, this.gl.UNSIGNED_SHORT, 0);
         //const error = this.gl.getError();
 
         /*

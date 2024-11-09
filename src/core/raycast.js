@@ -85,19 +85,17 @@ export function raycastMouseCollisionCheck(mouseX, mouseY) {
         }
     }
 
+    let i = null;
     if (selectedObject) {
         const name = selectedObject.name;
         console.log(`Selected object: ${name}`);
 
-        //*
-        const i = masterRenderer.objects.indexOf(selectedObject);
-        masterRenderer.objects.splice(i, 1);
-        masterRenderer.buffers.splice(i, 1);
-        console.log(`${name} has been terminated`);
-        //*/
+        i = masterRenderer.objects.indexOf(selectedObject);
+
     } 
     else {
         console.log('No object selected');
     }
+    masterRenderer.handleSelection(i);
 }
 

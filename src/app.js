@@ -17,9 +17,12 @@ export class GraphicsEngine {
         //initialize WebGL
         this.gl.clearColor(0, 0, 0, 1);
         this.gl.enable(this.gl.DEPTH_TEST);
+        this.gl.depthFunc(this.gl.LESS);
+        this.gl.frontFace(this.gl.CW);
         this.gl.enable(this.gl.CULL_FACE);
-        this.gl.frontFace(this.gl.CCW);
         this.gl.cullFace(this.gl.BACK);
+        this.gl.enable(this.gl.BLEND);
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 
         //compile shaders, buffers and render transform matricies
         masterRenderer.initialise(this.gl, this.canvas, camera, objects);

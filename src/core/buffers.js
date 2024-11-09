@@ -14,6 +14,7 @@ export function initBuffers(gl, objects) {
         buffers[i] = {
             vertexBufferObject,
             indexBufferObject,
+
             indexCount: objects[i].indices.length
         };
         //console.log(vertexBufferObject);
@@ -23,6 +24,8 @@ export function initBuffers(gl, objects) {
     return buffers;
 }
 
+
+/*
 //set attr pointers:
 //attr loc, no of elements per attr
 //type of elements
@@ -32,8 +35,10 @@ export function setAttrPointers(gl, buffers, positionAttrLoc, colourAttrLoc) {
     for (let i = 0; i < buffers.length; i++) {
         gl.bindBuffer(gl.ARRAY_BUFFER, buffers[i].vertexBufferObject);
 
-        gl.vertexAttribPointer(positionAttrLoc, 3, gl.FLOAT, false, 6 * Float32Array.BYTES_PER_ELEMENT, 0);
-        gl.vertexAttribPointer(colourAttrLoc, 3, gl.FLOAT, false, 6 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
+        const attrLen = 6 * Float32Array.BYTES_PER_ELEMENT;
+
+        gl.vertexAttribPointer(positionAttrLoc, 3, gl.FLOAT, false, attrLen, 0);
+        gl.vertexAttribPointer(colourAttrLoc, 3, gl.FLOAT, false, attrLen, 3 * Float32Array.BYTES_PER_ELEMENT);
 
         gl.enableVertexAttribArray(positionAttrLoc);
         gl.enableVertexAttribArray(colourAttrLoc);
@@ -45,13 +50,15 @@ export function setLightingAttrPointers(gl, buffers, positionAttrLoc, normalAttr
     for (let i = 0; i < buffers.length; i++) {
         gl.bindBuffer(gl.ARRAY_BUFFER, buffers[i].vertexBufferObject);
 
-        gl.vertexAttribPointer(positionAttrLoc, 3, gl.FLOAT, false, 9 * Float32Array.BYTES_PER_ELEMENT, 0);
-        gl.vertexAttribPointer(normalAttrLoc, 3, gl.FLOAT, false, 9 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
-        gl.vertexAttribPointer(colourAttrLoc, 3, gl.FLOAT, false, 9 * Float32Array.BYTES_PER_ELEMENT, 6 * Float32Array.BYTES_PER_ELEMENT);
+        const attrLen = 9 * Float32Array.BYTES_PER_ELEMENT;
+
+        gl.vertexAttribPointer(positionAttrLoc, 3, gl.FLOAT, false, attrLen, 0);
+        gl.vertexAttribPointer(normalAttrLoc, 3, gl.FLOAT, false, attrLen, 3 * Float32Array.BYTES_PER_ELEMENT);
+        gl.vertexAttribPointer(colourAttrLoc, 3, gl.FLOAT, false, attrLen, 6 * Float32Array.BYTES_PER_ELEMENT);
         
         gl.enableVertexAttribArray(positionAttrLoc);
         gl.enableVertexAttribArray(normalAttrLoc);
         gl.enableVertexAttribArray(colourAttrLoc);
     }
 }
-
+*/

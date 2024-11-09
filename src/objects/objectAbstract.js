@@ -10,8 +10,13 @@ export class Object {
         this.yaw = yaw;
         this.roll = roll;
 
+        this.shininess = 100.0;
+
         this.vertices;
         this.indices;
+
+        this.mode;
+        this.selected = false;
     }
 
     //methods to produce deep copies
@@ -24,5 +29,9 @@ export class Object {
 
     getPos() {
         return [this.x, this.y, this.z];
+    }
+
+    setMode(mode) {
+        this.mode = mode;
     }
 }
