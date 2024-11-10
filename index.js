@@ -18,6 +18,18 @@ const objects = [
 ];
 //*/
 
+/*
+//the induction stove test
+const range = 40;
+const objects = [];
+for (let i = -range; i <= range; i += 3) {
+    for (let j = -range; j <= range; j += 3) {
+        for (let k = -range; k <= range; k += 2) {
+            objects.push(new Sphere("Sam the Destroyer", i, j, k, 1, 10, [0, 0, 1]));
+        }
+    }
+}
+*/
 
 
 /*

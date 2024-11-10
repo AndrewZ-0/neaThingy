@@ -1,6 +1,6 @@
 import {updateShaderOverlays} from "./overlays.js";
 import {initBuffers} from "./buffers.js"; //, setAttrPointers, setLightingAttrPointers
-import {initUniforms, initLightingUniforms, initMatricies} from "./renderTransforms.js";
+import {initUniforms, initLightingUniforms} from "./renderTransforms.js";
 import {BasicShader, SkeletonShader, PointsShader, LightingShader} from "./shaders.js";
 import * as utils from "../utils/viewHelper.js";
 
@@ -16,6 +16,9 @@ class Renderer {
         this.objects;
         this.shader;
         this.program;
+
+
+        this.updateFlag = false;
     }
 
     initialise(gl, canvas, camera, objects) {
@@ -25,6 +28,8 @@ class Renderer {
         this.objects = objects;
 
         this.program = this.gl.createProgram();
+
+        this.updateFlag = true;
     }
 
     initialiseShaderEnvironment() {
@@ -69,7 +74,16 @@ class Renderer {
     }
 
     setMatricies() {
-        this.matricies = initMatricies(this.canvas, this.camera);
+        this.matricies = {
+            world: utils.createMat4(), 
+            view: utils.createMat4(), 
+            proj: utils.createMat4()
+        };
+    
+        utils.identityMat4(this.matricies.world);
+        utils.lookAt(this.matricies.view, {x: 0, y: 0, z: -8}, utils.globalOrigin, utils.globalUp);
+    
+        this.matricies.proj = this.camera.getProjMat(this.canvas);
     }
 
     setUniforms() {
@@ -106,21 +120,37 @@ class Renderer {
         this.gl.enableVertexAttribArray(this.colourAttrLoc);
     }
 
+    frameObjectSetUp(object, buffer) {
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer.vertexBufferObject);
+
+        this.handleAttribsAndObjUniforms(object);
+
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, buffer.indexBufferObject);
+
+        utils.translate(this.matricies.world, object);
+        utils.setMat4rotation(this.matricies.world, object);
+    }
+
+    frameObjectCleanUp() {
+        utils.identityMat4(this.matricies.world);
+    }
+
     render() {
-        this.gl.clear(this.gl.DEPTH_BUFFER_BIT | this.gl.COLOR_BUFFER_BIT);
-    
-        //render each shape
-        for (let i = 0; i < this.objects.length; i++) {
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers[i].vertexBufferObject);
+        this.updateFlag = this.updateFlag || this.camera.changedSinceLastFrame;
 
-            this.handleAttribsAndObjUniforms(this.objects[i]);
+        if (this.updateFlag) {
+            this.gl.clear(this.gl.DEPTH_BUFFER_BIT | this.gl.COLOR_BUFFER_BIT);
+        
+            //render each shape
+            for (let i = 0; i < this.objects.length; i++) {
+                this.frameObjectSetUp(this.objects[i], this.buffers[i]);
 
-            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.buffers[i].indexBufferObject);
-    
-            utils.translate(this.matricies.world, this.objects[i]);
-            utils.setMat4rotation(this.matricies.world, this.objects[i]);
-            this.shaderDrawElements(this.buffers[i].indexCount, this.objects[i].mode);
-            utils.identityMat4(this.matricies.world);
+                this.shaderDrawElements(this.buffers[i].indexCount, this.objects[i].mode);
+                
+                this.frameObjectCleanUp();
+            }
+
+            this.updateFlag = false;
         }
     }
 }
@@ -230,6 +260,8 @@ class AdvancedRenderer extends Renderer {
         updateShaderOverlays();
 
         this.setAllUniformMatrixies();
+
+        this.updateFlag = true;
     }
 
     handleAttribsAndObjUniforms(object) {
@@ -270,12 +302,14 @@ class AdvancedRenderer extends Renderer {
     }
 
     handleSelection(i) {
+        this.updateFlag = true;
         if (i === null) {
             if (this.currentSelection !== null) {
                 this.deselectObject(this.currentSelection);
                 this.currentSelection = null;
             }
             else {
+                this.updateFlag = false;
                 return null; //if nothing had been selected and nothing is selected, then nothing needs to be updated
             }
         }
@@ -297,53 +331,51 @@ class AdvancedRenderer extends Renderer {
         //this.configureBuffer();
     }
 
+    renderSelected() {
+        this.frameObjectSetUp(this.objects[this.currentSelection], this.buffers[this.currentSelection]);
+
+        this.setColourOverrideUniform(1);
+        this.gl.depthMask(false);
+
+        this.shaderDrawElements(this.buffers[this.currentSelection].indexCount, this.gl.TRIANGLES);
+
+        this.gl.depthMask(true);
+        
+        this.gl.disable(this.gl.DEPTH_TEST);
+        this.shaderDrawElements(this.buffers[this.currentSelection].indexCount, this.gl.LINES);
+
+        this.gl.enable(this.gl.DEPTH_TEST);
+        this.setColourOverrideUniform(0);
+
+        this.frameObjectCleanUp();
+    }
+
     render() {
-        this.gl.clear(this.gl.DEPTH_BUFFER_BIT | this.gl.COLOR_BUFFER_BIT);
-    
-        //render each shape
-        for (let i = 0; i < this.objects.length; i++) {
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers[i].vertexBufferObject);
+        this.updateFlag = this.updateFlag || this.camera.changedSinceLastFrame;
 
-            this.handleAttribsAndObjUniforms(this.objects[i]);
+        if (this.updateFlag) {
+            this.gl.clear(this.gl.DEPTH_BUFFER_BIT | this.gl.COLOR_BUFFER_BIT);
+        
+            //render each shape
+            for (let i = 0; i < this.objects.length; i++) {
+                this.frameObjectSetUp(this.objects[i], this.buffers[i]);
 
-            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.buffers[i].indexBufferObject);
-    
-            utils.translate(this.matricies.world, this.objects[i]);
-            utils.setMat4rotation(this.matricies.world, this.objects[i]);
-            if (! this.objects[i].selected) {
-                this.shaderDrawElements(this.buffers[i].indexCount, this.objects[i].mode);
+                if (! this.objects[i].selected) {
+                    this.shaderDrawElements(this.buffers[i].indexCount, this.objects[i].mode);
+                }
+
+                this.frameObjectCleanUp();
             }
-            utils.identityMat4(this.matricies.world);
+
+            //----------------------------------------------------------------------------------------------------
+
+            if (this.currentSelection !== null) {
+                this.renderSelected();
+            }
+            //----------------------------------------------------------------------------------------------------
+
+            this.updateFlag = false;
         }
-
-        //----------------------------------------------------------------------------------------------------
-
-        if (this.currentSelection !== null) {
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers[this.currentSelection].vertexBufferObject);
-
-            this.handleAttribsAndObjUniforms(this.objects[this.currentSelection]);
-
-            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.buffers[this.currentSelection].indexBufferObject);
-
-            utils.translate(this.matricies.world, this.objects[this.currentSelection]);
-            utils.setMat4rotation(this.matricies.world, this.objects[this.currentSelection]);
-            
-
-            this.gl.disable(this.gl.DEPTH_TEST);
-            this.setColourOverrideUniform(1);
-            this.gl.depthMask(false);
-
-            this.shaderDrawElements(this.buffers[this.currentSelection].indexCount, this.gl.TRIANGLES);
-
-            this.gl.depthMask(true);
-
-            this.shaderDrawElements(this.buffers[this.currentSelection].indexCount, this.gl.LINES);
-
-            this.setColourOverrideUniform(0);
-            this.gl.enable(this.gl.DEPTH_TEST);
-            utils.identityMat4(this.matricies.world);
-        }
-        //----------------------------------------------------------------------------------------------------
     }
 }
 
@@ -353,14 +385,16 @@ class BasicRenderer extends Renderer {
         super();
     }
 
-    initialise(gl, canvas, camera, objects) {
+    initialise(gl, canvas, camera, shader, objects) {
         super.initialise(gl, canvas, camera, objects);
 
-        this.shader = new BasicShader(this.gl);
+        this.shader = shader;
 
         this.initialiseShaderEnvironment();
+        this.updateFlag = true;
     }
 }
 
 export const masterRenderer = new AdvancedRenderer();
+export const orientationRenderer = new BasicRenderer();
 export const axisRenderer = new BasicRenderer();

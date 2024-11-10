@@ -1,6 +1,7 @@
 import {camera, toggleCameraMode} from "./camera.js";
-import {masterRenderer} from "./renderer.js";
+import {masterRenderer, orientationRenderer, axisRenderer} from "./renderer.js";
 import {raycastMouseCollisionCheck} from "./raycast.js"
+import {updateMousePosOverlays, removeMousePosOverlays} from "./overlays.js";
 
 export let keys = {
     w: false,
@@ -8,7 +9,13 @@ export let keys = {
     s: false,
     d: false,
     shift: false,
-    space: false
+    space: false, 
+    left: false, 
+    right: false, 
+    up: false, 
+    down: false, 
+    comma: false, 
+    period: false
 };
 
 function handleKeyDown(event) {
@@ -31,12 +38,30 @@ function handleKeyDown(event) {
         case " ":
             keys.space = true;
             break;
+        case "arrowleft":
+            keys.left = true;
+            break;
+        case "arrowright":
+            keys.right = true;
+            break;
+        case "arrowup":
+            keys.up = true;
+            break;
+        case "arrowdown":
+            keys.down = true;
+            break;
+        case ",":
+            keys.comma = true;
+            break;
+        case ".":
+            keys.period = true;
+            break;
         default:
             break;
     }
 }
 
-function handleKeyUp(event, canvas) {
+function handleKeyUp(event) {
     switch (event.key.toLowerCase()) {
         case "w":
             keys.w = false;
@@ -56,11 +81,44 @@ function handleKeyUp(event, canvas) {
         case " ":
             keys.space = false;
             break;
+        case "arrowleft":
+            keys.left = false;
+            break;
+        case "arrowright":
+            keys.right = false;
+            break;
+        case "arrowup":
+            keys.up = false;
+            break;
+        case "arrowdown":
+            keys.down = false;
+            break;
+        case ",":
+            keys.comma = false;
+            break;
+        case ".":
+            keys.period = false;
+            break;
+        case "x":
+            toggleSelectionMovement("x");
+            break;
+        case "y":
+            toggleSelectionMovement("y");
+            break;
+        case "z":
+            toggleSelectionMovement("z");
+            break;
         case "p":
             masterRenderer.toggleShaderMode();
             break;
         case "c":
             toggleCameraMode();
+            masterRenderer.camera = camera; //reset camera pointer for master renderer
+            axisRenderer.camera = camera;
+            orientationRenderer.camera = camera;
+            camera.forceUpdateCamera(masterRenderer.matricies.view);
+            camera.forceUpdateCamera(axisRenderer.matricies.view);
+            //camera.forceUpdateCamera(orientationRenderer.matricies.view);
             break;
         default:
             break;
@@ -91,6 +149,8 @@ function handleMouseMove(event) {
 
         camera.onMouseMove(offset);
     }
+
+    updateMousePosOverlays(event.x, event.y);
 }
 
 function handleMouseButtonDown(event) {
@@ -117,6 +177,8 @@ function handleMouseButtonUp(event) {
 function handleMouseButtonLeave(event) {
     mouseDragging = false;
     clickFlag = true;
+
+    removeMousePosOverlays();
 }
 
 
@@ -137,7 +199,7 @@ export function bindAllControls(canvas) {
     );
     document.addEventListener(
         "keyup", function(event) {
-            handleKeyUp(event, canvas);
+            handleKeyUp(event);
         }
     );
 
@@ -150,7 +212,12 @@ export function bindVisabilityChange(lambda) {
 
 
 
-
+let SelectionMovementAxis = null;
+function toggleSelectionMovement(axis) {
+    if (masterRenderer.currentSelection != null) {
+        let SelectionMovementAxis = axis;
+    }
+}
 
 
 

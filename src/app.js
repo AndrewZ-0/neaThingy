@@ -1,9 +1,10 @@
 import {clock} from "./core/clock.js";
-import {masterRenderer, axisRenderer} from "./core/renderer.js";
+import {masterRenderer, orientationRenderer, axisRenderer} from "./core/renderer.js";
 import {camera} from "./core/camera.js";
 import {updateCameraModeOverlay, updateCameraPerspectiveOverlays, updateFpsOverlay} from "./core/overlays.js";
 import {bindVisabilityChange, bindAllControls} from "./core/listeners.js";
 import {orientationMenu} from "./core/orientationViewPort.js";
+import {axisViewport} from "./core/axisViewPort.js";
 
 export class GraphicsEngine {
     constructor(objects) {
@@ -46,8 +47,11 @@ export class GraphicsEngine {
         camera.updateCamera(masterRenderer.matricies.view);
         masterRenderer.render();
 
-        orientationMenu.updateView();
+        axisViewport.updateView();
         axisRenderer.render();
+
+        orientationMenu.updateView();
+        orientationRenderer.render();
 
         clock.updateDeltaT();
         updateFpsOverlay();
@@ -58,6 +62,9 @@ export class GraphicsEngine {
     start = () => {
         //condition here as a quick fix for initial hidden document "inifinity fps issue"
         if (!document.hidden) {
+            camera.forceUpdateCamera(masterRenderer.matricies.view);
+            camera.forceUpdateCamera(axisRenderer.matricies.view);
+            //camera.forceUpdateCamera(orientationRenderer.matricies.view);
             requestAnimationFrame(this.mainloop);
         }
     }
@@ -68,6 +75,8 @@ export class GraphicsEngine {
         } 
         else {
             clock.last_t = window.performance.now();
+            camera.forceUpdateCamera(masterRenderer.matricies.view);
+            //camera.forceUpdateCamera(orientationRenderer.matricies.view);
             this.currentAnimationFrame = requestAnimationFrame(this.mainloop);
         }
     }
@@ -84,6 +93,8 @@ export class GraphicsEngine {
 
             masterRenderer.setMatricies();
             masterRenderer.setProjUniformMatrix4fv();
+
+            masterRenderer.updateFlag = true;
         }
     }
 }

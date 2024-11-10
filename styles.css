@@ -23,6 +23,14 @@ canvas {
     display: block;
 }
 
+#axisViewport-surface {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    pointer-events: none;
+}
+
 #orientationViewport-surface {
     position: absolute;
     right: 0; 

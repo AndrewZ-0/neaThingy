@@ -1,7 +1,8 @@
 import * as utils from "../utils/viewHelper.js";
 import {Sphere, Cylinder} from "../objects/objects.js";
 import {camera} from "./camera.js";
-import {axisRenderer} from "./renderer.js";
+import {orientationRenderer} from "./renderer.js";
+import {BasicShader} from "./shaders.js";
 
 const axisViewportSize = 130;
 
@@ -27,22 +28,22 @@ class OrientationMenu {
         this.gl.clearColor(0.0, 0.0, 0.0, 0.0);
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.enable(this.gl.CULL_FACE);
-        this.gl.frontFace(this.gl.CCW);
+        this.gl.frontFace(this.gl.CW);
         this.gl.cullFace(this.gl.BACK);
 
-        axisRenderer.initialise(this.gl, this.canvas, camera, objects);
+        orientationRenderer.initialise(this.gl, this.canvas, camera, new BasicShader(this.gl), objects);
 
         
         //override the default camera projection matrix with an orthogonal system 
         //  -->  (I'll fix this later so that it can be set init)
-        axisRenderer.matricies.proj = utils.ortho(-1.2, 1.2, -1.2, 1.2, -1.2, 1.2); 
+        orientationRenderer.matricies.proj = utils.ortho(-1.2, 1.2, -1.2, 1.2, -1.2, 1.2); 
 
 
-        axisRenderer.setAllUniformMatrixies();
+        orientationRenderer.setAllUniformMatrixies();
     }
 
     updateView() {
-        camera.getOrientationViewMatrix(axisRenderer.matricies.view);
+        camera.getOrientationViewMatrix(orientationRenderer.matricies.view);
     }
 }
 

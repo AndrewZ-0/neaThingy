@@ -18,9 +18,6 @@ function getRayFromNDC(x, y) {
     const rayClip = {x, y, z: -1, w: 1}; //clip space
     const rayEye = utils.transformMat4(rayClip, invertedProjectionMatrix);
 
-    //eye space
-    //rayEye.x /= rayEye.w;
-    //rayEye.y /= rayEye.w;
     rayEye.z = -1;
     rayEye.w = 0;
 
@@ -31,21 +28,6 @@ function getRayFromNDC(x, y) {
     
     return rayDir;
 }
-
-/*
-function objectIntersectsRay(object, rayOrigin, rayDir) {
-    const r = object.getBoundingSphereRadius();
-    
-    const h = utils.subVec3(object, rayOrigin); //from camera to sphere origin
-
-    const a = utils.dotVec3(rayDir, rayDir);
-    const b = 2 * utils.dotVec3(h, rayDir);
-    const c = utils.dotVec3(h, h) - r * r;
-
-    //console.log(">", a, utils.dotVec3(h, h), "<")
-
-    return utils.discriminant(a, b, c) >= 0;
-}*/
 
 function objectIntersectsRay(object, rayOrigin, rayDir) {
     const r = object.getBoundingSphereRadius();

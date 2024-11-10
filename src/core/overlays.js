@@ -48,9 +48,9 @@ export function updateCameraPerspectiveOverlays() {
 }
 
 export function updateCameraCartesianCoordsOverlays() {
-    document.getElementById("x-overlay").innerHTML = `X: ${camera.coords.x.toFixed(3)}`; 
-    document.getElementById("y-overlay").innerHTML = `Y: ${camera.coords.y.toFixed(3)}`; 
-    document.getElementById("z-overlay").innerHTML = `Z: ${camera.coords.z.toFixed(3)}`; 
+    document.getElementById("x-overlay").innerHTML = `Camera X: ${camera.coords.x.toFixed(3)}`; 
+    document.getElementById("y-overlay").innerHTML = `Camera Y: ${camera.coords.y.toFixed(3)}`; 
+    document.getElementById("z-overlay").innerHTML = `Camera Z: ${camera.coords.z.toFixed(3)}`; 
 }
 
 export function updateCameraPolarCoordsOverlays() {
@@ -71,3 +71,13 @@ export function updateCameraEulerAnglesOverlays() {
     }`; 
 }
 
+
+export function updateMousePosOverlays(mouseX, mouseY) {
+    document.getElementById("mouseX-overlay").innerHTML = `Mouse X: ${mouseX}`; 
+    document.getElementById("mouseY-overlay").innerHTML = `Mouse Y: ${mouseY}`; 
+}
+
+export function removeMousePosOverlays() {
+    document.getElementById("mouseX-overlay").innerHTML = ""; 
+    document.getElementById("mouseY-overlay").innerHTML = ""; 
+}

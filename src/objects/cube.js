@@ -123,7 +123,7 @@ export class Cube extends Object {
     }
 
     getBoundingSphereRadius() {
-        return 1;
+        return Math.sqrt(2);
     }
 }
 

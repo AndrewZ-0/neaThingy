@@ -5,6 +5,7 @@ import {
 } from "./overlays.js";
 import {clock} from "./clock.js";
 import {keys, mouseDragging} from "./listeners.js";
+import {masterRenderer, axisRenderer} from "./renderer.js";
 
 
 export let cameraMode = "Y-Polar";
@@ -21,6 +22,17 @@ class Camera {
         this.sensitivity = 0.001;
 
         this.coords;
+
+        this.changedSinceLastFrame;
+    }
+
+    getProjMat(canvas) {
+        return utils.perspective(
+            utils.toRadian(this.fov), 
+            canvas.clientWidth / canvas.clientHeight, 
+            this.near, 
+            this.far
+        );
     }
 }
 
@@ -59,11 +71,34 @@ class CartesianCamera extends Camera {
     }
 
     handleMovements() {
-        utils.scaleTranslateVec3(this.coords, this.front, this.cameraSpeed * clock.deltaT * (keys.w - keys.s));
-        utils.scaleTranslateVec3(this.coords, this.right, this.cameraSpeed * clock.deltaT * (keys.d - keys.a));
-        utils.scaleTranslateVec3(this.coords, this.up, this.cameraSpeed * clock.deltaT * (keys.space - keys.shift));
-    
-        updateCameraCartesianCoordsOverlays();
+        if (keys.w || keys.s || keys.d || keys.a || keys.space || keys.shift || keys.left || keys.right || keys.up || keys.down || keys.period || keys.comma) {
+            utils.scaleTranslateVec3(this.coords, this.front, this.cameraSpeed * clock.deltaT * (keys.w - keys.s));
+            utils.scaleTranslateVec3(this.coords, this.right, this.cameraSpeed * clock.deltaT * (keys.d - keys.a));
+            utils.scaleTranslateVec3(this.coords, this.up, this.cameraSpeed * clock.deltaT * (keys.space - keys.shift));
+            updateCameraCartesianCoordsOverlays();
+
+
+            utils.applyQuat(
+                this.orientation, utils.getAxisAngle(
+                    this.right, this.cameraSpeed * clock.deltaT * (keys.up - keys.down) * 0.05
+                )
+            ); //pitch
+            utils.applyQuat(
+                this.orientation, utils.getAxisAngle(
+                    this.up, this.cameraSpeed * clock.deltaT * (keys.left - keys.right) * 0.05
+                )
+            ); //yaw
+            utils.applyQuat(
+                this.orientation, utils.getAxisAngle(
+                    this.front, this.cameraSpeed * clock.deltaT * (keys.period - keys.comma) * 0.05
+                )
+            ); //roll
+            utils.normaliseQuat(this.orientation);
+            this.updateDirectionVects();
+            updateCameraEulerAnglesOverlays();
+
+            this.changedSinceLastFrame = true;
+        }
     }
 
     //to help overlay calls from outside camera class - polymorphism IG
@@ -88,8 +123,24 @@ class CartesianCamera extends Camera {
     }
 
     updateCamera(viewMatrix) {
+        this.changedSinceLastFrame = mouseDragging;
+
         this.handleMovements();
     
+        this.getViewMatrix(viewMatrix);
+    }
+
+    forceUpdateCamera(viewMatrix) {
+        //this.handleMovements();
+    
+        this.getViewMatrix(viewMatrix);
+
+        this.changedSinceLastFrame = true;
+        masterRenderer.render();
+        axisRenderer.render();
+    }
+
+    getViewMatrix(viewMatrix) {
         utils.lookAt(viewMatrix, this.coords, this.front, this.up);
     }
 
@@ -118,6 +169,8 @@ class PolarCamera extends Camera {
         this.azi = init_azi; //azimuth
 
         this.front;
+
+        //this.updatePosition();
     }
 
     readjustAngles() {
@@ -154,12 +207,20 @@ class PolarCamera extends Camera {
     }
 
     handleMovements() {
-        this.r += this.cameraSpeed * clock.deltaT * (keys.s - keys.w);
-        this.azi += this.azi_movement_sf * (keys.d - keys.a);
-        this.alt += this.alt_movement_sf * (keys.space - keys.shift);
+        const deltaR = this.cameraSpeed * clock.deltaT * (keys.s - keys.w);
+        const deltaAzi = this.azi_movement_sf * (keys.d - keys.a);
+        const deltaAlt = this.alt_movement_sf * (keys.space - keys.shift);
 
-        this.readjustAngles();
-        this.updatePosition();
+        if (deltaR || deltaAzi || deltaAlt) {
+            this.r += deltaR;
+            this.azi += deltaAzi;
+            this.alt += deltaAlt;
+
+            this.readjustAngles();
+            this.updatePosition();
+
+            this.changedSinceLastFrame = true;
+        }
     }
 
     onMouseMove(offset) {
@@ -168,11 +229,30 @@ class PolarCamera extends Camera {
 
         this.readjustAngles();
         this.updatePosition();
+
+        this.changedSinceLastFrame = true;
     }
 
     updateCamera(viewMatrix) {
+        this.changedSinceLastFrame = mouseDragging;
+
         this.handleMovements();
 
+        this.getViewMatrix(viewMatrix);
+    }
+
+    forceUpdateCamera(viewMatrix) {
+        this.updatePosition();
+        //this.handleMovements();
+    
+        this.getViewMatrix(viewMatrix);
+
+        this.changedSinceLastFrame = true;
+        masterRenderer.render();
+        axisRenderer.render();
+    }
+
+    getViewMatrix(viewMatrix) {
         utils.lookAt(viewMatrix, this.coords, this.front, utils.globalUp);
     }
 
@@ -202,12 +282,12 @@ export function toggleCameraMode() {
             utils.coordsfromPolar(camera.r, camera.alt, camera.azi), 
             utils.quatOrientationFromPolar(camera.alt, camera.azi)
         );
-        updateCameraEulerAnglesOverlays();
+        camera.updateAllOverlays();
     }
 
     updateCameraModeOverlay();
 }
 
 
-//let camera = new CartesianCamera({x: 0, y: 0, z: 6}, {x: 0, y: 0, z: 0, w: 1});
+//export let camera = new CartesianCamera({x: 0, y: 0, z: 6}, {x: 0, y: 0, z: 0, w: 1});
 export let camera = new PolarCamera(6, 0, 0);
