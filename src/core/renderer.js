@@ -331,6 +331,23 @@ class AdvancedRenderer extends Renderer {
         //this.configureBuffer();
     }
 
+    moveSelectedObjectAlong(axis, offset) {
+        const object = this.objects[this.currentSelection];
+
+        if (axis === "x") {
+            object.x += offset.x * 0.01;
+        }
+        else if (axis === "y") {
+            object.y += offset.y * 0.01;
+        }
+        else if (axis === "z") {
+            object.z += (offset.x + offset.y) * 0.01;
+        }
+
+        this.updateFlag = true;
+        this.render();
+    }
+
     renderSelected() {
         this.frameObjectSetUp(this.objects[this.currentSelection], this.buffers[this.currentSelection]);
 
@@ -360,7 +377,7 @@ class AdvancedRenderer extends Renderer {
             for (let i = 0; i < this.objects.length; i++) {
                 this.frameObjectSetUp(this.objects[i], this.buffers[i]);
 
-                if (! this.objects[i].selected) {
+                if (!this.objects[i].selected) {
                     this.shaderDrawElements(this.buffers[i].indexCount, this.objects[i].mode);
                 }
 

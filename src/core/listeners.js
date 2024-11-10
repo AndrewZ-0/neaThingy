@@ -1,7 +1,11 @@
 import {camera, toggleCameraMode} from "./camera.js";
 import {masterRenderer, orientationRenderer, axisRenderer} from "./renderer.js";
 import {raycastMouseCollisionCheck} from "./raycast.js"
-import {updateMousePosOverlays, removeMousePosOverlays} from "./overlays.js";
+import {
+    updateMousePosOverlays, removeMousePosOverlays, 
+    updateSelectedOverlay, updateSelectionMovementOverlay
+} from "./overlays.js";
+
 
 export let keys = {
     w: false,
@@ -141,7 +145,11 @@ function nextMouseOffset(event) {
 }
 
 function handleMouseMove(event) {
-    if (mouseDragging) {
+    if (selectionMovementAxis !== null) {
+        const offset = nextMouseOffset(event);
+        masterRenderer.moveSelectedObjectAlong(selectionMovementAxis, offset);
+    }
+    else if (mouseDragging) {
         clickFlag = false; //no longer a click
 
         //get relative change on screen
@@ -165,6 +173,8 @@ function handleMouseButtonUp(event) {
     if (event.button === 0) {
         if (clickFlag) {
             raycastMouseCollisionCheck(event.x, event.y);
+            toggleSelectionMovement(null);
+            updateSelectedOverlay();
         }
         else {
             clickFlag = true;
@@ -190,7 +200,6 @@ function bindCameraCallbacks(canvas) {
 }
 
 
-
 export function bindAllControls(canvas) {
     document.addEventListener(
         "keydown", function(event) {
@@ -212,10 +221,20 @@ export function bindVisabilityChange(lambda) {
 
 
 
-let SelectionMovementAxis = null;
+export let selectionMovementAxis = null;
 function toggleSelectionMovement(axis) {
-    if (masterRenderer.currentSelection != null) {
-        let SelectionMovementAxis = axis;
+    if (masterRenderer.currentSelection !== null) {
+        if (selectionMovementAxis === axis) {
+            selectionMovementAxis = null;
+        }
+        else {
+            selectionMovementAxis = axis;
+        }
+        updateSelectionMovementOverlay(selectionMovementAxis);
+    }
+    else if (axis === null) {
+        selectionMovementAxis = null;
+        updateSelectionMovementOverlay(selectionMovementAxis);
     }
 }
 

@@ -81,3 +81,22 @@ export function removeMousePosOverlays() {
     document.getElementById("mouseX-overlay").innerHTML = ""; 
     document.getElementById("mouseY-overlay").innerHTML = ""; 
 }
+
+export function updateSelectedOverlay() {
+    if (masterRenderer.currentSelection === null) {
+        document.getElementById("selection-overlay").innerHTML = "";
+    }
+    else {
+        const selection = masterRenderer.objects[masterRenderer.currentSelection].name;
+        document.getElementById("selection-overlay").innerHTML = `Selection: ${selection}`;
+    }
+}
+
+export function updateSelectionMovementOverlay(axis) {
+    if (axis === null) {
+        document.getElementById("selectionMovement-overlay").innerHTML = "";
+    }
+    else {
+        document.getElementById("selectionMovement-overlay").innerHTML = `Movement Axis: ${axis}`;
+    }
+}

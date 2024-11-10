@@ -76,6 +76,7 @@ export class GraphicsEngine {
         else {
             clock.last_t = window.performance.now();
             camera.forceUpdateCamera(masterRenderer.matricies.view);
+            camera.forceUpdateCamera(axisRenderer.matricies.view);
             //camera.forceUpdateCamera(orientationRenderer.matricies.view);
             this.currentAnimationFrame = requestAnimationFrame(this.mainloop);
         }

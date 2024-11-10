@@ -70,14 +70,15 @@ export function raycastMouseCollisionCheck(mouseX, mouseY) {
     let i = null;
     if (selectedObject) {
         const name = selectedObject.name;
-        console.log(`Selected object: ${name}`);
+        //console.log(`Selected object: ${name}`);
 
         i = masterRenderer.objects.indexOf(selectedObject);
-
     } 
+    /*
     else {
         console.log('No object selected');
     }
+    */
     masterRenderer.handleSelection(i);
 }
 
