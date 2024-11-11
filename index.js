@@ -1,7 +1,7 @@
 import {GraphicsEngine} from "./src/app.js";
 import {Cube, Cylinder, Sphere, Torus} from "./src/objects/objects.js";
 
-/*
+//*
 const objects = [
     new Sphere("Sam the Sphere", 0, 0, 0, 1, 25, [0, 0, 1]), 
     new Sphere("Sunny the Sphere", 3, 0, 0, 0.5, 30, [0, 0, 1]), 
@@ -18,7 +18,7 @@ const objects = [
 ];
 //*/
 
-//*
+/*
 //the induction stove test
 const range = 40;
 const objects = [];
@@ -29,7 +29,7 @@ for (let i = -range; i <= range; i += 2) {
         }
     }
 }
-//*/
+/*/
 
 
 /*
