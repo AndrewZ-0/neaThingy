@@ -1,4 +1,4 @@
-export class Object {
+export class RenderObject {
     constructor(name, x, y, z, pitch, yaw, roll) {
         this.name = name;
         

@@ -1,6 +1,6 @@
-import {Object} from "./objectAbstract.js";
+import {RenderObject} from "./objectAbstract.js";
 
-export class Line extends Object {
+export class Line extends RenderObject {
     constructor(name, x, y, z, direction, colour) {
         super(name, x, y, z, 0, 0, 0);
 

@@ -1,4 +1,4 @@
-import * as utils from "../utils/viewHelper.js";
+import * as utils from "../utils/linearAlgebra.js";
 import {Sphere, Cylinder} from "../objects/objects.js";
 import {camera} from "./camera.js";
 import {orientationRenderer} from "./renderer.js";

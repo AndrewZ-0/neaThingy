@@ -193,12 +193,11 @@ function handleMouseButtonLeave(event) {
 
 
 function bindCameraCallbacks(canvas) {
-    canvas.addEventListener("mousemove", handleMouseMove);
-    canvas.addEventListener("mousedown", handleMouseButtonDown);
-    canvas.addEventListener("mouseup", handleMouseButtonUp);
-    canvas.addEventListener("mouseleave", handleMouseButtonLeave);
+    canvas.addEventListener("pointermove", handleMouseMove);
+    canvas.addEventListener("pointerdown", handleMouseButtonDown);
+    canvas.addEventListener("pointerup", handleMouseButtonUp);
+    canvas.addEventListener("pointerleave", handleMouseButtonLeave);
 }
-
 
 export function bindAllControls(canvas) {
     document.addEventListener(
@@ -243,9 +242,9 @@ function toggleSelectionMovement(axis) {
 
 //legacy -----------------------------------------------------------------------------------
 function unbindCameraCallbacks(canvas) {
-    canvas.removeEventListener("mousemove", handleMouseMove);
-    canvas.removeEventListener("mousedown", handleMouseButtonDown);
-    canvas.removeEventListener("mouseup", handleMouseButtonUp);
-    canvas.removeEventListener("mouseleave", handleMouseButtonLeave);
+    canvas.removeEventListener("pointermove", handleMouseMove);
+    canvas.removeEventListener("pointerdown", handleMouseButtonDown);
+    canvas.removeEventListener("pointerup", handleMouseButtonUp);
+    canvas.removeEventListener("pointerleave", handleMouseButtonLeave);
 }
 //------------------------------------------------------------------------------------------

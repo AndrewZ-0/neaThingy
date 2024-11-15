@@ -1,5 +1,5 @@
 import {masterRenderer} from "./renderer.js";
-import * as utils from "../utils/viewHelper.js";
+import * as utils from "../utils/linearAlgebra.js";
 
 
 function getNormalizedDeviceCoords(mouseX, mouseY) {

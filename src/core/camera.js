@@ -1,4 +1,4 @@
-import * as utils from "../utils/viewHelper.js";
+import * as utils from "../utils/linearAlgebra.js";
 import {
     updateCameraCartesianCoordsOverlays, updateCameraModeOverlay, 
     updateCameraEulerAnglesOverlays, updateCameraPolarCoordsOverlays
@@ -80,17 +80,17 @@ class CartesianCamera extends Camera {
 
             utils.applyQuat(
                 this.orientation, utils.getAxisAngle(
-                    this.right, this.cameraSpeed * clock.deltaT * (keys.up - keys.down) * 0.05
+                    this.right, this.cameraSpeed * clock.deltaT * (keys.up - keys.down) * 0.08
                 )
             ); //pitch
             utils.applyQuat(
                 this.orientation, utils.getAxisAngle(
-                    this.up, this.cameraSpeed * clock.deltaT * (keys.left - keys.right) * 0.05
+                    this.up, this.cameraSpeed * clock.deltaT * (keys.left - keys.right) * 0.08
                 )
             ); //yaw
             utils.applyQuat(
                 this.orientation, utils.getAxisAngle(
-                    this.front, this.cameraSpeed * clock.deltaT * (keys.period - keys.comma) * 0.05
+                    this.front, this.cameraSpeed * clock.deltaT * (keys.period - keys.comma) * 0.08
                 )
             ); //roll
             utils.normaliseQuat(this.orientation);

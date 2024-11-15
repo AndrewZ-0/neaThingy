@@ -1,8 +1,8 @@
-import { Object } from "./objectAbstract.js";
+import {RenderObject} from "./objectAbstract.js";
 
 
 
-export class Cube extends Object {
+export class Cube extends RenderObject {
     constructor(name, x, y, z, pitch, yaw, roll) {
         super(name, x, y, z, pitch, yaw, roll);
         this.x = x

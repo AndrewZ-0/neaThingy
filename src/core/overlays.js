@@ -1,6 +1,6 @@
 import {camera, cameraMode} from "./camera.js";
 import {masterRenderer} from "./renderer.js";
-import * as utils from "../utils/viewHelper.js";
+import * as utils from "../utils/linearAlgebra.js";
 import {clock} from "./clock.js";
 
 //fps stuff

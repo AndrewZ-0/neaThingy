@@ -1,6 +1,6 @@
-import {Object} from "./objectAbstract.js";
+import {RenderObject} from "./objectAbstract.js";
 
-export class Torus extends Object {
+export class Torus extends RenderObject {
     constructor(name, x, y, z, pitch, yaw, roll, R, r, radialSegments, tubularSegments, colour) {
         super(name, x, y, z, pitch, yaw, roll);
         

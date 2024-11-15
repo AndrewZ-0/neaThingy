@@ -1,6 +1,6 @@
-import {Object} from "./objectAbstract.js"
+import {RenderObject} from "./objectAbstract.js"
 
-export class Cylinder extends Object {
+export class Cylinder extends RenderObject {
     constructor(name, x, y, z, pitch, yaw, roll, radius, height, fidelity, colour) {
         super(name, x, y, z, pitch, yaw, roll); 
 

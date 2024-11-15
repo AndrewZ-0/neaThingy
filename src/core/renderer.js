@@ -2,7 +2,7 @@ import {updateShaderOverlays} from "./overlays.js";
 import {initBuffers} from "./buffers.js"; //, setAttrPointers, setLightingAttrPointers
 import {initUniforms, initLightingUniforms} from "./renderTransforms.js";
 import {BasicShader, SkeletonShader, PointsShader, LightingShader} from "./shaders.js";
-import * as utils from "../utils/viewHelper.js";
+import * as utils from "../utils/linearAlgebra.js";
 
 class Renderer {
     constructor() {

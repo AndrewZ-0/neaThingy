@@ -1,6 +1,6 @@
-import {Object} from "./objectAbstract.js";
+import {RenderObject} from "./objectAbstract.js";
 
-export class Sphere extends Object {
+export class Sphere extends RenderObject {
     constructor(name, x, y, z, radius, fidelity, colour) {
         super(name, x, y, z, 0, 0, 0);
 
